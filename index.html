@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0b0b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="عطارة البركة">
+    <meta name="description" content="تطبيق ويب لإدارة أسعار المنتجات في محل العطارة">
+    
+    <title>عطارة البركة</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%230b0b0b' width='180' height='180'/><text x='50%' y='50%' font-size='90' fill='%23D4AF37' text-anchor='middle' dominant-baseline='middle' font-family='Arial'>🌿</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%230b0b0b' width='180' height='180'/><text x='50%' y='50%' font-size='90' fill='%23D4AF37' text-anchor='middle' dominant-baseline='middle' font-family='Arial'>🌿</text></svg>">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <h1>🌿 عطارة البركة</h1>
+        <input 
+            type="text" 
+            id="search" 
+            placeholder="ابحث عن صنف..."
+            autocomplete="off"
+        >
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Filter Buttons -->
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">الكل</button>
+            <button class="filter-btn" data-filter="بهارات">بهارات</button>
+            <button class="filter-btn" data-filter="بن">بن</button>
+            <button class="filter-btn" data-filter="أعشاب">أعشاب</button>
+            <button class="filter-btn" data-filter="مكسرات">مكسرات</button>
+        </div>
+
+        <!-- Products Container -->
+        <div id="products"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <p>📦 لا توجد أصناف حتى الآن</p>
+            <small>ابدأ بإضافة أول صنف</small>
+        </div>
+
+        <!-- Add Button -->
+        <div style="text-align: center; margin-top: 20px; margin-bottom: 30px;">
+            <button id="addBtn" onclick="openAddModal()">
+                ➕ إضافة صنف جديد
+            </button>
+        </div>
+    </main>
+
+    <!-- Modal: Add/Edit Product -->
+    <div id="productModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">إضافة صنف جديد</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+
+            <form id="productForm">
+                <!-- Name -->
+                <div class="form-group">
+                    <label for="productName">اسم الصنف *</label>
+                    <input type="text" id="productName" required placeholder="مثال: إكليل الجبل">
+                </div>
+
+                <!-- Category -->
+                <div class="form-group">
+                    <label for="productCategory">التصنيف *</label>
+                    <select id="productCategory" required>
+                        <option value="">اختر التصنيف</option>
+                        <option value="بهارات">بهارات</option>
+                        <option value="بن">بن</option>
+                        <option value="أعشاب">أعشاب</option>
+                        <option value="مكسرات">مكسرات</option>
+                    </select>
+                </div>
+
+                <!-- Type -->
+                <div class="form-group">
+                    <label for="productType">النوع</label>
+                    <input type="text" id="productType" placeholder="مثال: محلي/مستورد">
+                </div>
+
+                <!-- Grade -->
+                <div class="form-group">
+                    <label for="productGrade">الدرجة</label>
+                    <input type="text" id="productGrade" placeholder="مثال: ممتاز/جودة عالية">
+                </div>
+
+                <!-- Purchase Price -->
+                <div class="form-group">
+                    <label for="purchasePrice">سعر الشراء (ريال) *</label>
+                    <input type="number" id="purchasePrice" required placeholder="0.00" step="0.01" min="0">
+                </div>
+
+                <!-- Selling Price -->
+                <div class="form-group">
+                    <label for="sellingPrice">سعر البيع (ريال) *</label>
+                    <input type="number" id="sellingPrice" required placeholder="0.00" step="0.01" min="0">
+                </div>
+
+                <!-- Supplier -->
+                <div class="form-group">
+                    <label for="productSupplier">المورد</label>
+                    <input type="text" id="productSupplier" placeholder="اسم المورد">
+                </div>
+
+                <!-- Notes -->
+                <div class="form-group">
+                    <label for="productNotes">ملاحظات</label>
+                    <textarea id="productNotes" placeholder="أي ملاحظات إضافية..."></textarea>
+                </div>
+
+                <!-- Profit Display -->
+                <div class="profit-info" id="profitInfo" style="display: none;">
+                    <p><strong>الربح المتوقع:</strong> <span id="profitAmount">0.00</span> ريال</p>
+                    <p><strong>نسبة الربح:</strong> <span id="profitPercent">0.00</span>%</p>
+                </div>
+
+                <!-- Form Buttons -->
+                <div style="display: flex; gap: 10px; margin-top: 20px; margin-bottom: 10px;">
+                    <button type="submit" class="btn-primary">حفظ</button>
+                    <button type="button" class="btn-secondary" onclick="closeModal()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: View Product -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="detailsTitle">تفاصيل الصنف</h2>
+                <button class="modal-close" onclick="closeDetailsModal()">&times;</button>
+            </div>
+
+            <div id="productDetails" style="padding: 20px;"></div>
+
+            <div style="display: flex; gap: 10px; padding: 20px; border-top: 2px solid #d4af37;">
+                <button onclick="editProduct()" class="btn-primary" style="flex: 1;">تعديل</button>
+                <button onclick="deleteProduct()" class="btn-danger" style="flex: 1;">حذف</button>
+                <button onclick="closeDetailsModal()" class="btn-secondary" style="flex: 1;">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {
+                console.log('Service Worker not available');
+            });
+        }
+
+        // Handle installation prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+    </script>
+
+    <script src="app.js"></script>
+</body>
+</html>
