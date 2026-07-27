@@ -1,5 +1,6 @@
 // ===== Storage & State =====
 const STORAGE_KEY = 'attarat_albarakah_products';
+const FORM_CACHE_KEY = 'attarat_albarakah_form_cache';
 let products = [];
 let currentEditingId = null;
 let currentViewingId = null;
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadProducts();
     renderProducts();
     setupEventListeners();
+    restoreFormCache();
 });
 
 // ===== Event Listeners =====
@@ -42,7 +44,13 @@ function setupEventListeners() {
 
     // Profit calculation
     document.getElementById('purchasePrice').addEventListener('input', updateProfitDisplay);
-    document.getElementById('sellingPrice').addEventListener('input', updateProfitDisplay);
+
+    // Save form cache on input
+    const formInputs = productForm.querySelectorAll('input, select, textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('input', saveFormCache);
+        input.addEventListener('change', saveFormCache);
+    });
 
     // Modal close on overlay click
     document.getElementById('productModal').addEventListener('click', (e) => {
@@ -72,6 +80,53 @@ function saveProducts() {
     } catch (error) {
         console.error('Error saving products:', error);
         showToast('خطأ في حفظ البيانات', 'error');
+    }
+}
+
+// ===== Form Cache Functions =====
+function saveFormCache() {
+    try {
+        const formData = {
+            productName: document.getElementById('productName').value,
+            productCategory: document.getElementById('productCategory').value,
+            productType: document.getElementById('productType').value,
+            productGrade: document.getElementById('productGrade').value,
+            purchasePrice: document.getElementById('purchasePrice').value,
+            sellingPrice: document.getElementById('sellingPrice').value,
+            productSupplier: document.getElementById('productSupplier').value,
+            productNotes: document.getElementById('productNotes').value,
+            timestamp: new Date().getTime()
+        };
+        localStorage.setItem(FORM_CACHE_KEY, JSON.stringify(formData));
+    } catch (error) {
+        console.error('Error saving form cache:', error);
+    }
+}
+
+function restoreFormCache() {
+    try {
+        const cached = localStorage.getItem(FORM_CACHE_KEY);
+        if (cached) {
+            const formData = JSON.parse(cached);
+            document.getElementById('productName').value = formData.productName || '';
+            document.getElementById('productCategory').value = formData.productCategory || '';
+            document.getElementById('productType').value = formData.productType || '';
+            document.getElementById('productGrade').value = formData.productGrade || '';
+            document.getElementById('purchasePrice').value = formData.purchasePrice || '';
+            document.getElementById('sellingPrice').value = formData.sellingPrice || '';
+            document.getElementById('productSupplier').value = formData.productSupplier || '';
+            document.getElementById('productNotes').value = formData.productNotes || '';
+        }
+    } catch (error) {
+        console.error('Error restoring form cache:', error);
+    }
+}
+
+function clearFormCache() {
+    try {
+        localStorage.removeItem(FORM_CACHE_KEY);
+    } catch (error) {
+        console.error('Error clearing form cache:', error);
     }
 }
 
@@ -109,60 +164,69 @@ function createProductCard(product) {
     card.style.cursor = 'pointer';
     card.addEventListener('click', () => viewProduct(product.id));
 
-    const profit = product.sellingPrice - product.purchasePrice;
+    const profit = product.purchasePrice - product.sellingPrice;
     const profitPercent = product.purchasePrice > 0 
         ? ((profit / product.purchasePrice) * 100).toFixed(1)
         : 0;
 
     let detailsHTML = `
-        <h2>${escapeHtml(product.name)}</h2>
-        <span class="category">${escapeHtml(product.category)}</span>
+        <div class="card-header">
+            <h2>${escapeHtml(product.name)}</h2>
+            <span class="category">${escapeHtml(product.category)}</span>
+        </div>
+        <div class="card-rows">
     `;
 
-    if (product.type || product.grade) {
-        detailsHTML += '<p>';
-        if (product.type) detailsHTML += `النوع: ${escapeHtml(product.type)} • `;
-        if (product.grade) detailsHTML += `الدرجة: ${escapeHtml(product.grade)}`;
-        detailsHTML += '</p>';
+    // اسم الصنف + التصنيف معروضة بالأعلى
+
+    if (product.type) {
+        detailsHTML += `
+            <div class="card-row">
+                <span class="row-label">النوع</span>
+                <span class="row-value">${escapeHtml(product.type)}</span>
+            </div>
+        `;
     }
 
-    if (product.supplier) {
-        detailsHTML += `<p>المورد: ${escapeHtml(product.supplier)}</p>`;
+    if (product.grade) {
+        detailsHTML += `
+            <div class="card-row">
+                <span class="row-label">الدرجة</span>
+                <span class="row-value">${escapeHtml(product.grade)}</span>
+            </div>
+        `;
     }
 
     detailsHTML += `
-        <div class="prices">
-            <div class="price-box">
-                <span class="price-label">سعر الشراء</span>
-                <span class="price-value">${product.purchasePrice.toFixed(2)}</span>
-                <span class="price-label">ر.س</span>
-            </div>
-            <div class="price-box">
-                <span class="price-label">سعر البيع</span>
-                <span class="price-value">${product.sellingPrice.toFixed(2)}</span>
-                <span class="price-label">ر.س</span>
-            </div>
+        <div class="card-row">
+            <span class="row-label">سعر الشراء</span>
+            <span class="row-value">${product.purchasePrice.toFixed(2)} ر.س</span>
+        </div>
+        <div class="card-row">
+            <span class="row-label">سعر البيع</span>
+            <span class="row-value price-sell">${product.sellingPrice.toFixed(2)} ر.س</span>
+        </div>
     `;
 
     if (profit > 0) {
         detailsHTML += `
-            <div class="price-box">
-                <span class="price-label">الربح</span>
-                <span class="price-value">${profit.toFixed(2)}</span>
-                <span class="price-label">(${profitPercent}%)</span>
+            <div class="card-row profit-row">
+                <span class="row-label">الربح المتوقع</span>
+                <span class="row-value profit-value">+${profit.toFixed(2)} ر.س (${profitPercent}%)</span>
+            </div>
+        `;
+    }
+
+    if (product.supplier) {
+        detailsHTML += `
+            <div class="card-row">
+                <span class="row-label">المورد</span>
+                <span class="row-value">${escapeHtml(product.supplier)}</span>
             </div>
         `;
     }
 
     detailsHTML += '</div>';
-
-    if (profit > 0) {
-        detailsHTML += `
-            <div class="profit-badge">
-                <span>✓ ربح متوقع: ${profit.toFixed(2)} ريال (${profitPercent}%)</span>
-            </div>
-        `;
-    }
 
     card.innerHTML = detailsHTML;
     return card;
@@ -171,10 +235,12 @@ function createProductCard(product) {
 // ===== Modal Functions =====
 function openAddModal() {
     currentEditingId = null;
-    productForm.reset();
     document.getElementById('modalTitle').textContent = 'إضافة صنف جديد';
     document.getElementById('profitInfo').style.display = 'none';
     productModal.classList.add('active');
+    
+    // استعادة البيانات المحفوظة
+    restoreFormCache();
     document.getElementById('productName').focus();
 }
 
@@ -201,6 +267,7 @@ function openEditModal(id) {
 function closeModal() {
     productModal.classList.remove('active');
     currentEditingId = null;
+    // الحفظ ما يزال موجود في الذاكرة
 }
 
 function closeDetailsModal() {
@@ -266,13 +333,17 @@ function handleFormSubmit(e) {
 
     saveProducts();
     renderProducts();
+    
+    // مسح الفورم والذاكرة بعد الحفظ الناجح
+    productForm.reset();
+    clearFormCache();
     closeModal();
 }
 
 function updateProfitDisplay() {
     const purchasePrice = parseFloat(document.getElementById('purchasePrice').value) || 0;
     const sellingPrice = parseFloat(document.getElementById('sellingPrice').value) || 0;
-    const profit = sellingPrice - purchasePrice;
+    const profit = purchasePrice - sellingPrice;
     const profitPercent = purchasePrice > 0 ? ((profit / purchasePrice) * 100).toFixed(1) : 0;
 
     const profitInfo = document.getElementById('profitInfo');
@@ -291,7 +362,7 @@ function viewProduct(id) {
     const product = products.find(p => p.id === id);
 
     if (product) {
-        const profit = product.sellingPrice - product.purchasePrice;
+        const profit = product.purchasePrice - product.sellingPrice;
         const profitPercent = product.purchasePrice > 0
             ? ((profit / product.purchasePrice) * 100).toFixed(1)
             : 0;
@@ -335,7 +406,7 @@ function viewProduct(id) {
                 <span class="detail-value">${product.sellingPrice.toFixed(2)} ر.س</span>
             </div>
             <div class="detail-item">
-                <span class="detail-label">الربح</span>
+                <span class="detail-label">الربح المتوقع</span>
                 <span class="detail-value">${profit.toFixed(2)} ر.س (${profitPercent}%)</span>
             </div>
         `;
@@ -437,4 +508,11 @@ window.importData = function() {
         reader.readAsText(file);
     };
     input.click();
+};
+
+// ===== Clear Form Cache Function =====
+window.clearCache = function() {
+    clearFormCache();
+    productForm.reset();
+    showToast('✓ تم مسح الذاكرة المحفوظة', 'success');
 };
