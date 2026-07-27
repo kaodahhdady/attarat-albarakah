@@ -1,0 +1,58 @@
+{
+  "name": "عطارة البركة",
+  "short_name": "البركة",
+  "description": "تطبيق ويب لإدارة أسعار المنتجات في محل العطارة",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0b0b0b",
+  "background_color": "#ffffff",
+  "dir": "rtl",
+  "lang": "ar-SA",
+  "categories": ["business", "productivity"],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%230b0b0b' width='540' height='720'/><rect fill='%23111111' width='540' height='100'/><text x='270' y='55' font-size='36' fill='%23D4AF37' text-anchor='middle' font-family='Arial' font-weight='bold'>عطارة البركة</text><text x='270' y='400' font-size='80' fill='%23D4AF37' text-anchor='middle'>🌿</text></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%230b0b0b' width='192' height='192' rx='45'/><text x='96' y='96' font-size='110' fill='%23D4AF37' text-anchor='middle' dominant-baseline='middle'>🌿</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><circle cx='96' cy='96' r='96' fill='%23D4AF37'/><text x='96' y='96' font-size='110' fill='%230b0b0b' text-anchor='middle' dominant-baseline='middle'>🌿</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%230b0b0b' width='512' height='512' rx='120'/><text x='256' y='256' font-size='300' fill='%23D4AF37' text-anchor='middle' dominant-baseline='middle'>🌿</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "إضافة صنف جديد",
+      "short_name": "إضافة",
+      "description": "إضافة منتج جديد",
+      "url": "./?action=add",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23D4AF37' width='192' height='192' rx='45'/><text x='96' y='96' font-size='100' fill='%230b0b0b' text-anchor='middle' dominant-baseline='middle'>➕</text></svg>",
+          "sizes": "192x192",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}
